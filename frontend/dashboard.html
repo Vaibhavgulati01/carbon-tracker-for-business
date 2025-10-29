@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Carbon Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Floating Sidebar -->
+        <aside class="app-sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-leaf"></i>
+                <span>Carbon Tracker</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li><a href="dashboard.html" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                    <li><a href="whatif.html"><i class="fas fa-lightbulb"></i> What-If Analysis</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">Company Admin</div>
+                        <div class="user-email">admin@company.com</div>
+                    </div>
+                </div>
+                <a href="index.html" class="logout-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Emission Analytics Dashboard</h1>
+                    <p>Real-time insights into your carbon footprint</p>
+                </div>
+                <div class="header-actions">
+                    <select id="periodSelector" class="btn-secondary" style="padding: 0.75rem 1rem;">
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year" selected>This Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                    <button class="btn-primary" onclick="downloadReport()">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Skeleton Loader -->
+            <div id="skeletonLoader">
+                <div class="metrics-row">
+                    <div class="skeleton skeleton-metric"></div>
+                    <div class="skeleton skeleton-metric"></div>
+                    <div class="skeleton skeleton-metric"></div>
+                    <div class="skeleton skeleton-metric"></div>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="span-12">
+                        <div class="skeleton skeleton-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div id="dashboardContent" class="hidden">
+                <!-- Metric Cards -->
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-icon total">
+                            <i class="fas fa-smog"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Total Emissions</h3>
+                            <p class="metric-value">
+                                <span id="totalEmissions">0</span>
+                                <span class="metric-unit">tCO₂e</span>
+                            </p>
+                            <span class="metric-change positive">
+                                <i class="fas fa-arrow-down"></i> 12.5%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon scope1">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Scope 1</h3>
+                            <p class="metric-value">
+                                <span id="scope1Emissions">0</span>
+                                <span class="metric-unit">tCO₂e</span>
+                            </p>
+                            <span class="metric-change negative">
+                                <i class="fas fa-arrow-up"></i> 3.2%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon scope2">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Scope 2</h3>
+                            <p class="metric-value">
+                                <span id="scope2Emissions">0</span>
+                                <span class="metric-unit">tCO₂e</span>
+                            </p>
+                            <span class="metric-change positive">
+                                <i class="fas fa-arrow-down"></i> 8.7%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon scope3">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Scope 3</h3>
+                            <p class="metric-value">
+                                <span id="scope3Emissions">0</span>
+                                <span class="metric-unit">tCO₂e</span>
+                            </p>
+                            <span class="metric-change positive">
+                                <i class="fas fa-arrow-down"></i> 15.3%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Trend Chart -->
+                    <div class="chart-card span-12">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Emissions Trend Over Time</h3>
+                            <div class="card-actions">
+                                <button class="icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Scope & Category Charts -->
+                    <div class="chart-card span-6">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-pie"></i> Emissions by Scope</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="scopeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card span-6">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-bar"></i> By Category</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- AI Insights -->
+                    <div class="ai-card span-12">
+                        <div class="card-header">
+                            <h3>AI-Powered Insights</h3>
+                        </div>
+                        <div class="insights-grid">
+                            <div class="insight-card anomaly">
+                                <div class="insight-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Anomaly Detected</h4>
+                                    <p>Scope 2 emissions increased 23% this week due to increased electricity at Facility B.</p>
+                                    <span class="insight-time">2 hours ago</span>
+                                </div>
+                            </div>
+
+                            <div class="insight-card prediction">
+                                <div class="insight-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Forecast</h4>
+                                    <p>Emissions projected to decrease 8.5% next quarter based on trends.</p>
+                                    <span class="insight-time">Updated daily</span>
+                                </div>
+                            </div>
+
+                            <div class="insight-card recommendation">
+                                <div class="insight-icon">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Opportunity</h4>
+                                    <p>LED lighting could reduce Scope 2 by 450 tCO₂e annually (7.2%).</p>
+                                    <span class="insight-time">AI-generated</span>
+                                </div>
+                            </div>
+
+                            <div class="insight-card benchmark">
+                                <div class="insight-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Benchmark</h4>
+                                    <p>15% better than industry average. Top 35th percentile.</p>
+                                    <span class="insight-time">Updated monthly</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Emission Sources Table -->
+                    <div class="span-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-table"></i> Top Emission Sources</h3>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Source</th>
+                                            <th>Scope</th>
+                                            <th>CO₂e (tons)</th>
+                                            <th>% of Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topSourcesBody">
+                                        <tr class="empty-state">
+                                            <td colspan="4">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Card -->
+                    <div class="span-4">
+                        <div class="card" style="height: 100%;">
+                            <div class="card-header">
+                                <h3><i class="fas fa-trophy"></i> Performance</h3>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Total Activities</div>
+                                    <div style="font-size: 2rem; font-weight: 700;" id="totalActivitiesCount">0</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Data Points</div>
+                                    <div style="font-size: 1.5rem; font-weight: 700;" id="dataPointsCount">0</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Last Updated</div>
+                                    <div style="font-size: 1rem; font-weight: 600;" id="lastUpdated">-</div>
+                                </div>
+                                <button class="btn-primary" style="width: 100%; margin-top: auto;" onclick="window.location.href='data-entry.html'">
+                                    <i class="fas fa-plus"></i> Add More Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Download Report</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; gap: 1rem;">
+                    <button class="btn-secondary" style="justify-content: flex-start; padding: 1rem;" onclick="generateReport('PDF')">
+                        <i class="fas fa-file-pdf" style="font-size: 2rem; color: var(--danger-color);"></i>
+                        <div>
+                            <strong>PDF Report</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Executive summary</div>
+                        </div>
+                    </button>
+                    <button class="btn-secondary" style="justify-content: flex-start; padding: 1rem;" onclick="generateReport('XLSX')">
+                        <i class="fas fa-file-excel" style="font-size: 2rem; color: var(--success-color);"></i>
+                        <div>
+                            <strong>Excel</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Raw data</div>
+                        </div>
+                    </button>
+                    <button class="btn-secondary" style="justify-content: flex-start; padding: 1rem;" onclick="generateReport('CSV')">
+                        <i class="fas fa-file-csv" style="font-size: 2rem; color: var(--info-color);"></i>
+                        <div>
+                            <strong>CSV</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Simple export</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

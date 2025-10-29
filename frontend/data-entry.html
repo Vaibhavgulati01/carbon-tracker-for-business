@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry - Carbon Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Simple Header with Logo -->
+    <div class="simple-header">
+        <div class="simple-logo">
+            <i class="fas fa-leaf"></i>
+            <span>Carbon Tracker</span>
+        </div>
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="entry-container">
+        <div class="entry-wrapper">
+            <div class="page-header">
+                <h1>Carbon Emission Data Entry</h1>
+                <p>Enter your organization's data to start tracking emissions</p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="progress-container">
+                <div class="progress-steps">
+                    <div class="progress-step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <span>Organization</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <span>Activity Data</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Organization Information -->
+            <section class="form-section" id="step1">
+                <div class="section-header">
+                    <h2><i class="fas fa-building"></i> Organization Information</h2>
+                    <p class="section-subtitle">Tell us about your company</p>
+                </div>
+                <form id="orgForm" class="data-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="orgName">Organization Name *</label>
+                            <input type="text" id="orgName" name="name" required maxlength="200" placeholder="Enter organization name">
+                        </div>
+                        <div class="form-group">
+                            <label for="sector">Sector *</label>
+                            <select id="sector" name="sector" required>
+                                <option value="">Select Sector</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Energy">Energy</option>
+                                <option value="Agriculture">Agriculture</option>
+                                <option value="Construction">Construction</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="orgSize">Organization Size *</label>
+                            <select id="orgSize" name="org_size" required>
+                                <option value="">Select Size</option>
+                                <option value="Small (1-50)">Small (1-50 employees)</option>
+                                <option value="Medium (51-250)">Medium (51-250 employees)</option>
+                                <option value="Large (251-1000)">Large (251-1000 employees)</option>
+                                <option value="Enterprise (1000+)">Enterprise (1000+ employees)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country *</label>
+                            <input type="text" id="country" name="country" required maxlength="80" placeholder="Enter country">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-primary" onclick="nextStep(1)">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Step 2: Activity Data Entry -->
+            <section class="form-section hidden" id="step2">
+                <div class="section-header">
+                    <h2><i class="fas fa-table"></i> Activity Data Entry</h2>
+                    <p class="section-subtitle">Add emission activities</p>
+                </div>
+
+                <!-- Quick Entry Tips -->
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Data Entry Tips:</strong>
+                        <ul>
+                            <li>Enter activity data as frequently as it occurs</li>
+                            <li>Use tab key to navigate between fields</li>
+                            <li>All activities will appear in the table below</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Activity Entry Form -->
+                <form id="activityForm" class="data-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="activityDate">Activity Date *</label>
+                            <input type="date" id="activityDate" name="activity_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category *</label>
+                            <select id="category" name="category" required onchange="updateSubcategories()">
+                                <option value="">Select Category</option>
+                                <option value="Fuel Combustion">Fuel Combustion (Scope 1)</option>
+                                <option value="Electricity">Electricity (Scope 2)</option>
+                                <option value="Transportation">Transportation (Scope 1)</option>
+                                <option value="Waste">Waste (Scope 3)</option>
+                                <option value="Water">Water (Scope 3)</option>
+                                <option value="Business Travel">Business Travel (Scope 3)</option>
+                                <option value="Employee Commute">Employee Commute (Scope 3)</option>
+                                <option value="Purchased Goods">Purchased Goods (Scope 3)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="subcategory">Subcategory *</label>
+                            <select id="subcategory" name="subcategory" required>
+                                <option value="">Select category first</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity *</label>
+                            <input type="number" id="quantity" name="quantity" step="0.01" required placeholder="Enter quantity" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="unit">Unit *</label>
+                            <select id="unit" name="unit" required>
+                                <option value="">Select Unit</option>
+                                <option value="kWh">kWh (Kilowatt-hour)</option>
+                                <option value="liters">Liters</option>
+                                <option value="kg">Kilograms</option>
+                                <option value="km">Kilometers</option>
+                                <option value="miles">Miles</option>
+                                <option value="tons">Tons</option>
+                                <option value="m3">Cubic Meters</option>
+                                <option value="gallons">Gallons</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="metaJson">Additional Notes (Optional)</label>
+                            <textarea id="metaJson" name="meta_json" rows="2" placeholder="Add any context about this activity"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="resetActivityForm()">
+                            <i class="fas fa-redo"></i> Clear
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-plus"></i> Add Activity
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Activities Summary -->
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h3><i class="fas fa-chart-pie"></i> Activities Summary</h3>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalActivities">0</span>
+                            <span class="stat-label">Total Activities</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="scope1Count">0</span>
+                            <span class="stat-label">Scope 1</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="scope2Count">0</span>
+                            <span class="stat-label">Scope 2</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="scope3Count">0</span>
+                            <span class="stat-label">Scope 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activities Table -->
+                <div class="section-header" style="margin-top: 2rem;">
+                    <h3><i class="fas fa-list"></i> Entered Activities</h3>
+                </div>
+                <div class="table-container">
+                    <table id="activitiesTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Subcategory</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                                <th>Scope</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activitiesBody">
+                            <tr class="empty-state">
+                                <td colspan="8">No activities added yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="form-actions" style="margin-top: 2rem;">
+                    <button type="button" class="btn-secondary" onclick="previousStep(2)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button type="button" class="btn-primary btn-large" onclick="submitAllData()">
+                        <i class="fas fa-check-circle"></i> Calculate Emissions
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="upload.js"></script>
+</body>
+</html>

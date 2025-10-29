@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What-If Analysis - Carbon Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="app-sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-leaf"></i>
+                <span>Carbon Tracker</span>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                    <li><a href="whatif.html" class="active"><i class="fas fa-lightbulb"></i> What-If Analysis</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">Company Admin</div>
+                        <div class="user-email">admin@company.com</div>
+                    </div>
+                </div>
+                <a href="index.html" class="logout-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <div>
+                    <h1>🤖 AI-Powered What-If Analysis</h1>
+                    <p>Visualize the impact of emission reduction scenarios</p>
+                </div>
+            </div>
+
+            <!-- Current Emissions Summary -->
+            <div class="metrics-row" id="currentMetrics">
+                <div class="metric-card">
+                    <div class="metric-icon total">
+                        <i class="fas fa-smog"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h3>Current Total</h3>
+                        <p class="metric-value">
+                            <span id="currentTotal">0</span>
+                            <span class="metric-unit">tCO₂e</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon scope1">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h3>Scope 1</h3>
+                        <p class="metric-value">
+                            <span id="currentScope1">0</span>
+                            <span class="metric-unit">tCO₂e</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon scope2">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h3>Scope 2</h3>
+                        <p class="metric-value">
+                            <span id="currentScope2">0</span>
+                            <span class="metric-unit">tCO₂e</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon scope3">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h3>Scope 3</h3>
+                        <p class="metric-value">
+                            <span id="currentScope3">0</span>
+                            <span class="metric-unit">tCO₂e</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- AI Chat Section -->
+                <div class="span-7">
+                    <div class="card" style="min-height: 600px; display: flex; flex-direction: column;">
+                        <div class="card-header">
+                            <h3><i class="fas fa-robot"></i> AI Scenario Assistant</h3>
+                        </div>
+                        
+                        <!-- Quick Scenario Buttons -->
+                        <div style="padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <p style="margin-bottom: 0.75rem; font-size: 0.9rem; opacity: 0.9;">
+                                <i class="fas fa-magic"></i> Quick Scenarios:
+                            </p>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                                <button class="scenario-btn" onclick="sendQuickScenario('renewable')">
+                                    <i class="fas fa-solar-panel"></i>
+                                    <span>50% Renewable Energy</span>
+                                </button>
+                                <button class="scenario-btn" onclick="sendQuickScenario('ev')">
+                                    <i class="fas fa-car-battery"></i>
+                                    <span>30% Electric Vehicles</span>
+                                </button>
+                                <button class="scenario-btn" onclick="sendQuickScenario('efficiency')">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>20% Energy Efficiency</span>
+                                </button>
+                                <button class="scenario-btn" onclick="sendQuickScenario('remote')">
+                                    <i class="fas fa-home"></i>
+                                    <span>40% Remote Work</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div id="chatMessages" style="flex: 1; padding: 1.5rem; overflow-y: auto; background: #f8f9fa;">
+                            <div class="message assistant">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <p><strong>👋 Hello! I'm your AI carbon reduction advisor.</strong></p>
+                                    <p>Ask me about any emission reduction scenario, and I'll provide:</p>
+                                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                        <li>📊 Before/After comparison charts</li>
+                                        <li>💰 Cost and ROI analysis</li>
+                                        <li>📅 Implementation timeline</li>
+                                        <li>✅ Action steps</li>
+                                    </ul>
+                                    <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                                        Try clicking a quick scenario above or type your own question!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div style="padding: 1rem; background: white; border-top: 2px solid #e0e0e0;">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input 
+                                    type="text" 
+                                    id="queryInput" 
+                                    placeholder="Ask about any emission reduction scenario..."
+                                    style="flex: 1; padding: 0.875rem; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 0.95rem; transition: all 0.3s;"
+                                    onfocus="this.style.borderColor='#667eea'"
+                                    onblur="this.style.borderColor='#e0e0e0'"
+                                />
+                                <button class="btn-primary" onclick="sendQuery()" style="padding: 0.875rem 1.75rem; border-radius: 12px;">
+                                    <i class="fas fa-paper-plane"></i> Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Comparison Section -->
+                <div class="span-5">
+                    <div class="card" style="min-height: 600px;">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-bar"></i> Impact Visualization</h3>
+                        </div>
+                        
+                        <!-- Scenario Impact Cards -->
+                        <div id="impactCards" style="padding: 1rem; display: none;">
+                            <div class="impact-summary">
+                                <div class="impact-metric reduction">
+                                    <div class="impact-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div>
+                                        <div class="impact-label">Reduction</div>
+                                        <div class="impact-value" id="reductionValue">0 tCO₂e</div>
+                                        <div class="impact-percent" id="reductionPercent">0%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="impact-metric investment">
+                                    <div class="impact-icon">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </div>
+                                    <div>
+                                        <div class="impact-label">Investment</div>
+                                        <div class="impact-value" id="investmentValue">$0</div>
+                                        <div class="impact-percent" id="roiValue">ROI: N/A</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Before/After Chart -->
+                            <div style="margin-top: 1.5rem;">
+                                <canvas id="comparisonChart" height="250"></canvas>
+                            </div>
+                            
+                            <!-- Scope Breakdown -->
+                            <div style="margin-top: 1.5rem;">
+                                <canvas id="scopeImpactChart" height="200"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Empty State -->
+                        <div id="emptyState" style="padding: 3rem 1.5rem; text-align: center; color: #999;">
+                            <i class="fas fa-chart-line" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p style="font-size: 1.1rem; margin: 0;">Ask a scenario question to see visual impact analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .scenario-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .scenario-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .scenario-btn i {
+            font-size: 1.2rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .message-content {
+            flex: 1;
+            background: white;
+            padding: 1.25rem;
+            border-radius: 16px;
+            line-height: 1.7;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        }
+
+        .message-content p {
+            margin: 0.5rem 0;
+        }
+
+        .message-content strong {
+            color: #2c3e50;
+        }
+
+        .impact-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .impact-metric {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 1.25rem;
+            border-radius: 12px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .impact-metric.reduction {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+        }
+
+        .impact-metric.investment {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .impact-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .impact-label {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 0.25rem;
+        }
+
+        .impact-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .impact-percent {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        #chatMessages {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+
+        #chatMessages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chatMessages::-webkit-scrollbar-track {
+            background: #f7fafc;
+        }
+
+        #chatMessages::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+    </style>
+
+    <script src="whatif.js"></script>
+</body>
+</html>
