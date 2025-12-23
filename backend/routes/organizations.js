@@ -1,5 +1,6 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
 const { docClient, TABLES } = require('../config/dynamodb');
 const { PutCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const auth = require('../middleware/auth');
@@ -67,9 +68,22 @@ router.post('/', auth, async (req, res) => {
             }
         }));
 
+        // Generate a NEW JWT token that includes the organizationId
+        const newToken = jwt.sign(
+            {
+                userId: req.user.userId,
+                email: req.user.email,
+                role: req.user.role,
+                organizationId: organizationId  // Include the new org ID!
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
         res.status(201).json({
             message: 'Organization created successfully',
-            organization
+            organization,
+            token: newToken  // Return new token to frontend
         });
 
     } catch (error) {

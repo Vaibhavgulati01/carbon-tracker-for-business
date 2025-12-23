@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
 
 function ActivityEntry() {
-    const { user } = useAuth()
+    const { user, refreshUser } = useAuth()
     const navigate = useNavigate()
     const [factors, setFactors] = useState({})
     const [categories, setCategories] = useState({})
     const [activities, setActivities] = useState([])
     const [loading, setLoading] = useState(false)
+    const [initializing, setInitializing] = useState(true)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
 
@@ -23,8 +24,15 @@ function ActivityEntry() {
     })
 
     useEffect(() => {
-        fetchFactors()
-        fetchActivities()
+        const init = async () => {
+            // Refresh user data first to get latest organizationId
+            await refreshUser()
+            setInitializing(false)
+            // Then fetch other data
+            fetchFactors()
+            fetchActivities()
+        }
+        init()
     }, [])
 
     const fetchFactors = async () => {
@@ -60,7 +68,7 @@ function ActivityEntry() {
 
         try {
             await api.post('/activities', formData)
-            setSuccess('Activity added successfully!')
+            setSuccess('Activity logged successfully')
             setFormData({
                 category: '',
                 subcategory: '',
@@ -78,7 +86,7 @@ function ActivityEntry() {
     }
 
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure you want to delete this activity?')) return
+        if (!confirm('Delete this activity entry?')) return
 
         try {
             await api.delete(`/activities/${id}`)
@@ -90,17 +98,34 @@ function ActivityEntry() {
 
     const selectedCategoryFactors = formData.category ? categories[formData.category] || [] : []
 
+    // Show loading while getting user data
+    if (initializing) {
+        return (
+            <div className="page-container">
+                <div className="loading-screen" style={{ minHeight: '50vh' }}>
+                    <div className="memory-loader">
+                        <div className="block b1"></div>
+                        <div className="block b2"></div>
+                        <div className="block b3"></div>
+                        <div className="block b4"></div>
+                    </div>
+                    <p className="mono uppercase">Loading...</p>
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <div className="animate-fadeIn">
+        <div className="page-container">
             <div className="page-header">
-                <h1 className="page-title">📝 Activity Entry</h1>
-                <p className="page-subtitle">Log your emission activities to calculate carbon footprint</p>
+                <h1 className="page-title">LOG ACTIVITY</h1>
+                <p className="page-subtitle">Record emission activities for carbon footprint calculation</p>
             </div>
 
             {!user?.organizationId && (
-                <div className="card" style={{ marginBottom: '1.5rem', background: 'rgba(245, 158, 11, 0.1)', borderColor: 'var(--warning)' }}>
-                    <p style={{ color: 'var(--warning)' }}>
-                        ⚠️ Please <a href="/organization" style={{ color: 'var(--warning)', textDecoration: 'underline' }}>set up your organization</a> before adding activities.
+                <div className="card" style={{ marginBottom: '1.5rem', borderColor: 'var(--ink)' }}>
+                    <p>
+                        Please <a href="/organization-setup">set up your organization</a> before logging activities.
                     </p>
                 </div>
             )}
@@ -108,18 +133,27 @@ function ActivityEntry() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
                 {/* Add Activity Form */}
                 <div className="card">
-                    <h3 style={{ marginBottom: '1.5rem' }}>Add New Activity</h3>
+                    <div className="card-header">
+                        <h3 className="card-title">New Entry</h3>
+                    </div>
 
                     {error && <div className="error-message">{error}</div>}
                     {success && (
-                        <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid var(--success)', color: 'var(--success)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
-                            {success}
+                        <div style={{
+                            background: 'var(--paper)',
+                            border: '2px solid var(--ink)',
+                            padding: '0.75rem 1rem',
+                            borderRadius: 'var(--radius-md)',
+                            marginBottom: '1rem',
+                            fontWeight: '500'
+                        }}>
+                            ✓ {success}
                         </div>
                     )}
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label>Category *</label>
+                            <label>Category</label>
                             <select
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '' })}
@@ -134,7 +168,7 @@ function ActivityEntry() {
 
                         {selectedCategoryFactors.length > 0 && (
                             <div className="form-group">
-                                <label>Type *</label>
+                                <label>Type</label>
                                 <select
                                     value={formData.subcategory}
                                     onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
@@ -151,12 +185,12 @@ function ActivityEntry() {
                         )}
 
                         <div className="form-group">
-                            <label>Quantity *</label>
+                            <label>Quantity</label>
                             <input
                                 type="number"
                                 value={formData.quantity}
                                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                                placeholder={formData.subcategory ? `Enter ${factors[formData.subcategory]?.unit || 'amount'}` : 'Enter quantity'}
+                                placeholder={formData.subcategory ? `Enter ${factors[formData.subcategory]?.unit || 'amount'}` : 'Enter value'}
                                 step="0.01"
                                 min="0"
                                 required
@@ -164,7 +198,7 @@ function ActivityEntry() {
                         </div>
 
                         <div className="form-group">
-                            <label>Date *</label>
+                            <label>Date</label>
                             <input
                                 type="date"
                                 value={formData.date}
@@ -174,7 +208,7 @@ function ActivityEntry() {
                         </div>
 
                         <div className="form-group">
-                            <label>Location</label>
+                            <label>Location (Optional)</label>
                             <input
                                 type="text"
                                 value={formData.location}
@@ -183,18 +217,8 @@ function ActivityEntry() {
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label>Description (Optional)</label>
-                            <textarea
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="Additional notes..."
-                                rows="2"
-                            />
-                        </div>
-
-                        <button type="submit" className="btn btn-primary btn-full" disabled={loading || !user?.organizationId}>
-                            {loading ? 'Adding...' : 'Add Activity'}
+                        <button type="submit" className="btn btn-solid btn-full" disabled={loading || !user?.organizationId}>
+                            {loading ? 'Saving...' : '+ Add Entry'}
                         </button>
                     </form>
                 </div>
@@ -202,16 +226,22 @@ function ActivityEntry() {
                 {/* Activities List */}
                 <div className="card">
                     <div className="card-header">
-                        <h3 className="card-title">Recent Activities</h3>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                        <h3 className="card-title">Activity Log</h3>
+                        <span className="mono" style={{ fontSize: '0.875rem' }}>
                             {activities.length} entries
                         </span>
                     </div>
 
                     {activities.length === 0 ? (
-                        <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
-                            No activities logged yet
-                        </p>
+                        <div style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+                            <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>○</p>
+                            <p style={{ marginBottom: '0.5rem' }}>
+                                No activities logged
+                            </p>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--pencil)' }}>
+                                Add your first emission activity
+                            </p>
+                        </div>
                     ) : (
                         <div className="table-container">
                             <table>
@@ -228,21 +258,26 @@ function ActivityEntry() {
                                 <tbody>
                                     {activities.slice(0, 10).map(activity => (
                                         <tr key={activity.activityId}>
-                                            <td>{new Date(activity.date).toLocaleDateString()}</td>
+                                            <td className="mono">{new Date(activity.date).toLocaleDateString()}</td>
                                             <td>{activity.category}</td>
-                                            <td>{activity.quantity} {activity.unit}</td>
-                                            <td>{activity.co2eKg?.toFixed(2)} kg</td>
+                                            <td className="mono">{activity.quantity} {activity.unit}</td>
+                                            <td className="mono" style={{ fontWeight: '600' }}>{activity.co2eKg?.toFixed(2)} kg</td>
                                             <td>
                                                 <span className={`badge badge-scope${activity.scope}`}>
-                                                    Scope {activity.scope}
+                                                    S{activity.scope}
                                                 </span>
                                             </td>
                                             <td>
                                                 <button
                                                     onClick={() => handleDelete(activity.activityId)}
-                                                    style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        fontSize: '1rem'
+                                                    }}
                                                 >
-                                                    🗑️
+                                                    ✕
                                                 </button>
                                             </td>
                                         </tr>
@@ -253,6 +288,22 @@ function ActivityEntry() {
                     )}
                 </div>
             </div>
+
+            {/* Process CTA */}
+            {activities.length > 0 && (
+                <div className="card" style={{ marginTop: '1.5rem', textAlign: 'center', padding: '2rem' }}>
+                    <h3 style={{ marginBottom: '0.5rem' }}>Ready to analyze?</h3>
+                    <p style={{ marginBottom: '1.5rem' }}>
+                        {activities.length} activities logged. View your dashboard for insights.
+                    </p>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="btn btn-solid btn-large"
+                    >
+                        View Dashboard →
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

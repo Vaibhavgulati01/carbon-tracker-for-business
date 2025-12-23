@@ -1,70 +1,49 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 function Layout() {
-    const { user, logout } = useAuth()
-    const navigate = useNavigate()
-
-    const handleLogout = () => {
-        logout()
-        navigate('/login')
-    }
+    const { user } = useAuth()
 
     return (
         <div className="app-layout">
-            <aside className="sidebar">
-                <div className="sidebar-logo">
-                    <div className="sidebar-logo-icon">🌱</div>
-                    <span className="sidebar-logo-text">Carbon Tracker</span>
-                </div>
+            {/* Top Navigation Bar */}
+            <nav className="top-nav">
+                <Link to="/dashboard" className="nav-logo">
+                    <span className="nav-logo-icon">🌱</span>
+                    <span>Carbon Tracker</span>
+                </Link>
 
-                <nav className="sidebar-nav">
-                    <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                        <span className="nav-icon">📊</span>
+                {/* Pill-style Navigation */}
+                <div className="nav-pill">
+                    <NavLink to="/dashboard" className={({ isActive }) => `nav-pill-item ${isActive ? 'active' : ''}`}>
+                        <span className="nav-icon">■</span>
                         Dashboard
                     </NavLink>
 
-                    <NavLink to="/activities" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                        <span className="nav-icon">📝</span>
-                        Activity Entry
+                    <NavLink to="/activities" className={({ isActive }) => `nav-pill-item ${isActive ? 'active' : ''}`}>
+                        <span className="nav-icon">+</span>
+                        Log Data
                     </NavLink>
 
-                    <NavLink to="/scenarios" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                        <span className="nav-icon">🔮</span>
-                        What-If Scenarios
+                    <NavLink to="/scenarios" className={({ isActive }) => `nav-pill-item ${isActive ? 'active' : ''}`}>
+                        <span className="nav-icon">◇</span>
+                        Scenarios
                     </NavLink>
 
-                    <NavLink to="/organization" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                        <span className="nav-icon">🏢</span>
-                        Organization
+                    <NavLink to="/audit" className={({ isActive }) => `nav-pill-item ${isActive ? 'active' : ''}`}>
+                        <span className="nav-icon">↓</span>
+                        Audit
                     </NavLink>
-                </nav>
-
-                <div style={{ borderTop: '1px solid var(--bg-tertiary)', paddingTop: '1rem', marginTop: 'auto' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                        <div style={{
-                            width: '36px',
-                            height: '36px',
-                            background: 'var(--primary)',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontWeight: '600'
-                        }}>
-                            {user?.name?.charAt(0).toUpperCase() || 'U'}
-                        </div>
-                        <div>
-                            <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>{user?.name}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{user?.email}</div>
-                        </div>
-                    </div>
-                    <button onClick={handleLogout} className="btn btn-secondary btn-full" style={{ fontSize: '0.9rem' }}>
-                        Sign Out
-                    </button>
                 </div>
-            </aside>
+
+                {/* User Avatar - Clickable to Account */}
+                <Link to="/account" className="nav-user-link">
+                    <div className="user-avatar">
+                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="user-name">{user?.name || 'User'}</span>
+                </Link>
+            </nav>
 
             <main className="main-content">
                 <Outlet />

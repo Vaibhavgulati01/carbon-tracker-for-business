@@ -54,13 +54,26 @@ export function AuthProvider({ children }) {
         setUser(prev => ({ ...prev, ...updates }))
     }
 
+    // Refresh user data from server
+    const refreshUser = async () => {
+        try {
+            const response = await api.get('/auth/me')
+            setUser(response.data.user)
+            return response.data.user
+        } catch (error) {
+            console.error('Failed to refresh user:', error)
+            return null
+        }
+    }
+
     const value = {
         user,
         loading,
         login,
         register,
         logout,
-        updateUser
+        updateUser,
+        refreshUser
     }
 
     return (
